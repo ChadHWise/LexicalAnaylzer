@@ -24,17 +24,33 @@ public class LexicalAnalyzer {
 		LexicalAnalyzer lex = new LexicalAnalyzer();
 		BufferedReader in = new BufferedReader(new FileReader("test.txt"));
 		char[] source = new char[100];
-		in.read(source);
+		lex.loadKeywords();
+		int lineNo = 0;
+		int state = 0;
+
+		Token total = lex.getToken("total");
+		lex.installId("price");
+		Token price = lex.getToken("price");
+		Token key = lex.getToken("if");
+
+		System.out.println(total.lexeme + " " + total.tokenType);
+		System.out.println(price.lexeme + " " + price.tokenType);
+		System.out.println(key.lexeme + " " + key.tokenType);
+
+		String nextLine = in.readLine();
+		while (nextLine != null) {
+			lineNo++;
+			source = nextLine.toCharArray();
+			for(int i = 0; i < source.length; i++) {
+				System.out.print(source[i]);
+			}
+			
+			
+			
+			nextLine = in.readLine();
+		}
 		in.close();
 
-		lex.loadKeywords();
-		
-		
-		Token test = lex.getToken("if");
-		Token test2 = lex.getToken("total");
-		
-		System.out.println(test.tokenType + test.lexeme);
-		System.out.println(test2.tokenType + test2.lexeme);
 	}
 
 	public void loadKeywords() {
@@ -47,11 +63,20 @@ public class LexicalAnalyzer {
 	}
 
 	public Token getToken(String value) {
-
-		if (table.get(value)) {
-			return new Token(111, value);
-		} else {
+		
+		
+		if(table.get(value) == null) {
+			return null;
+		}else if (table.get(value)) {
 			return new Token(100, value);
+		} else {
+			return new Token(111, value);
+		} 
+	}
+
+	public void installId(String value) {
+		if (table.get(value) == null) {
+			table.put(value, false);
 		}
 	}
 
