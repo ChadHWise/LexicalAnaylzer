@@ -19,21 +19,21 @@ public class LexicalAnalyzer {
 	public static final int RELOP = 110;
 	public static final int KEYWORD = 111;
 	public static final int INCOP = 112;
+	
+	
+	HashMap<String, Boolean> sTable = new HashMap<String, Boolean>();
+	
+	BufferedReader in;
+	
+	
+	public LexicalAnalyzer(BufferedReader in) {
+		super();
+		this.in = in;
+	}
 
-	HashMap<String, Boolean> table = new HashMap<String, Boolean>();
-
-	public static void main(String[] args) throws IOException {
-		LexicalAnalyzer lexAn = new LexicalAnalyzer();
+	public void runLex() throws IOException {
 		BufferedReader in = new BufferedReader(new FileReader("test.txt"));
-		lexAn.loadKeywords();
 		int lineNo = 1;
-//		Token total = lex.getToken("total");
-//		Token price = lex.getToken("price");
-//		Token key = lex.getToken("if");
-//
-//		System.out.println(total.lexeme + " " + total.tokenType);
-//		System.out.println(price.lexeme + " " + price.tokenType);
-//		System.out.println(key.lexeme + " " + key.tokenType);
 
 		String nextLine = in.readLine();
 		ArrayList<Token> tokens = new ArrayList<Token>();
@@ -78,7 +78,7 @@ public class LexicalAnalyzer {
 						case '>':
 							state = 8;
 							break;
-						case '+':
+						case '+':		
 							state = 9;
 							break;
 						case '-':
@@ -107,6 +107,9 @@ public class LexicalAnalyzer {
 						case '/':
 							state = 11;
 							break;
+						case ';':
+							tokens.add(new Token(SEMI,";"));
+							break;
 
 						}
 					}
@@ -124,7 +127,7 @@ public class LexicalAnalyzer {
 						lex = lex + source[j];
 					}
 					forwardP--;
-					tokens.add(lexAn.getToken(lex));
+					tokens.add(getToken(lex));
 					lex = "";
 					state = 0;
 					break;
@@ -132,7 +135,16 @@ public class LexicalAnalyzer {
 					if (Character.isDigit(forward)) {
 						break;
 					} else if (Character.isLetter(forward)) {
-						System.out.println("Number values cannot contain letters: Line " + lineNo);
+						String faildLex = " ";
+						for (int j = lexStart; j < forwardP + 1; j++) {
+							faildLex = faildLex + source[j];
+						}
+						String failMsg = "Number values cannot contain letters: Line " + lineNo + faildLex;
+						System.out.println(failMsg);
+						for(int j = 1;j<failMsg.length();j++) {
+							System.out.print(" ");
+						}
+						System.out.println("^");
 						System.exit(-1);
 					} else {
 						state = 4;
@@ -188,15 +200,15 @@ public class LexicalAnalyzer {
 						state = 0;
 					}
 					break;
-				case 9:
+				case 9:					
 					if (forward == '+') {
 						tokens.add(new Token(INCOP, "Increment"));
 						state = 0;
-					} else {
+					} else  {
 						tokens.add(new Token(ADDOP, "Add"));
 						forwardP--;
 						state = 0;
-					}
+					} 
 					break;
 				case 10:
 					if (forward == '-') {
@@ -214,7 +226,7 @@ public class LexicalAnalyzer {
 						state = 0;
 						forwardP = -1;
 						nextLine = in.readLine();
-						state = 0;
+						lineNo++;
 						source = nextLine.toCharArray();
 					} else if (forward == '*') {
 						// start comment
@@ -254,19 +266,19 @@ public class LexicalAnalyzer {
 
 	public void loadKeywords() {
 
-		table.put("if", true);
-		table.put("int", true);
-		table.put("else", true);
-		table.put("while", true);
-		table.put("total", false);
+		sTable.put("if", true);
+		sTable.put("int", true);
+		sTable.put("else", true);
+		sTable.put("while", true);
+		sTable.put("total", false);
 	}
 
 	public Token getToken(String value) {
 
-		if (table.get(value) == null) {
-			table.put(value, false);
+		if (sTable.get(value) == null) {
+			sTable.put(value, false);
 			return getToken(value);
-		} else if (table.get(value)) {
+		} else if (sTable.get(value)) {
 			return new Token(KEYWORD, value);
 		} else {
 			return new Token(ID, value);
